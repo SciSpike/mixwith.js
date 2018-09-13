@@ -13,7 +13,8 @@ const {
   Mixin,
   DeDupe,
   HasInstance,
-  mix
+  mix,
+  mixins
 } = require('../mixwith')
 
 suite('mixwith.js', () => {
@@ -334,7 +335,7 @@ suite('mixwith.js', () => {
       const M = Mixin(c => class extends c {})
       const N = Mixin(d => class extends d {})
 
-      class C extends mix(Object).with(M, N) {}
+      class C extends mixins(M, N) {}
 
       const c = new C()
       assert.isTrue(c instanceof C)

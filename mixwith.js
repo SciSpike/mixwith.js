@@ -209,6 +209,8 @@ const Mixin = mixin => HasInstance(DeDupe(Cached(BareMixin(mixin))))
    */
 const mix = superclass => new MixinBuilder(superclass)
 
+const mixins = (...ms) => mix().with(...ms)
+
 class MixinBuilder {
   constructor (superclass) {
     this.superclass = superclass || class {}
@@ -237,5 +239,6 @@ module.exports = {
   BareMixin,
   Mixin,
   mix,
+  mixins,
   MixinBuilder
 }
