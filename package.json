@@ -1,6 +1,6 @@
 {
-  "name": "mixwith",
-  "version": "0.1.1",
+  "name": "mixology",
+  "version": "1.0.0-pre.0",
   "description": "A simple, powerful mixin applier for JavaScript classes",
   "main": "mixwith.js",
   "directories": {
@@ -8,29 +8,28 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "babel-plugin-transform-es2015-modules-umd": "^6.1.18",
-    "chai": "^3.4.1",
-    "event-stream": "^3.3.2",
-    "gulp": "^3.9.0",
-    "gulp-babel": "^6.1.0"
+    "chai": "4.1.2",
+    "mocha": "5.2.0",
+    "standard": "12.0.1"
   },
   "scripts": {
-    "test": "mocha build/test",
-    "build": "gulp"
+    "test-only": "mocha -u tdd test",
+    "test": "npm run test-only",
+    "posttest": "npm run lint",
+    "lint": "standard --verbose"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/justinfagnani/mixwith.js.git"
+    "url": "git+https://github.com/scispike/mixwith.js.git"
   },
   "keywords": [
     "mixin",
     "mixins",
     "classes"
   ],
-  "author": "Jusitn Fagnani <justin@fagnani.com>",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/justinfagnani/mixwith.js/issues"
+    "url": "https://github.com/scispike/mixwith.js/issues"
   },
-  "homepage": "https://github.com/justinfagnani/mixwith.js#readme"
+  "homepage": "https://github.com/scispike/mixwith.js#readme"
 }
