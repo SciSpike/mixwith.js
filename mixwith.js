@@ -155,10 +155,11 @@ const DeDupe = mixin => wrap(mixin, superclass => hasMixin(superclass.prototype,
    * @return {MixinFunction} the given mixin function
    */
 const HasInstance = mixin => {
-  if (Symbol && Symbol.hasInstance && !mixin[Symbol.hasInstance]) {
+  if (Symbol && Symbol.hasInstance) {
+    const priorInstanceOf = mixin[Symbol.hasInstance]
     Object.defineProperty(mixin, Symbol.hasInstance, {
       value (o) {
-        return hasMixin(o, mixin)
+        return priorInstanceOf(o) || hasMixin(o, mixin)
       }
     })
   }
@@ -184,7 +185,7 @@ const BareMixin = mixin => wrap(mixin, s => apply(s, mixin))
    * @param {MixinFunction} mixin The mixin to wrap
    * @return {MixinFunction} a new mixin function
    */
-const Mixin = mixin => DeDupe(Cached(BareMixin(mixin)))
+const Mixin = mixin => HasInstance(DeDupe(Cached(BareMixin(mixin))))
 
 /**
    * A fluent interface to apply a list of mixins to a superclass.

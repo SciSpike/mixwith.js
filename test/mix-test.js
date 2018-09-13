@@ -10,6 +10,7 @@ const {
   unwrap,
   hasMixin,
   BareMixin,
+  Mixin,
   DeDupe,
   HasInstance,
   mix
@@ -325,6 +326,22 @@ suite('mixwith.js', () => {
       assert.equal('C.snafu', i.snafu())
       assert.equal(42, C.staticMixinMethod())
       assert.equal(7, C.staticClassMethod())
+    })
+  })
+
+  suite('basic usage', () => {
+    test('class instanceof mixin', () => {
+      const M = Mixin(c => class extends c {})
+      const N = Mixin(d => class extends d {})
+
+      class C extends mix(Object).with(M, N) {}
+
+      const c = new C()
+      assert.isTrue(c instanceof C)
+      assert.isTrue(hasMixin(c, M))
+      assert.isTrue(hasMixin(c, N))
+      assert.isTrue(c instanceof M)
+      assert.isTrue(c instanceof N)
     })
   })
 })
