@@ -113,17 +113,20 @@ suite('mixwith.js', () => {
       assert.deepEqual(i.foo(), 12)
     })
 
-    test('methods on superclass are present', () => {
-      const M = BareMixin((s) => class extends s {})
+    test('properties on mixin are present', () => {
+      const M = BareMixin((s) => class extends s {
+        constructor () {
+          super(...arguments)
+          this.field = 12
+        }
+        get foo () { return this.field }
+      })
 
-      class S {
-        foo () { return 'foo' }
-      }
-
-      class C extends M(S) {}
+      class C extends M(Object) {}
 
       const i = new C()
-      assert.deepEqual(i.foo(), 'foo')
+      assert.deepEqual(i.field, 12)
+      assert.deepEqual(i.foo, 12)
     })
 
     test('fields on superclass are present', () => {
@@ -410,6 +413,7 @@ suite('mixwith.js', () => {
       assert.isTrue(isApplicationOf(nthPrototypeOf(i, 3), M1))
       assert.isNotNull(nthPrototypeOf(i, 4))
       assert.equal(nthPrototypeOf(i, 5), Object.prototype)
+      assert.isTrue(nthPrototypeOf(i, 6) === null)
     })
 
     test('mix() can omit the superclass', () => {
@@ -463,6 +467,66 @@ suite('mixwith.js', () => {
       assert.isTrue(hasMixin(c, N))
       assert.isTrue(c instanceof M)
       assert.isTrue(c instanceof N)
+    })
+  })
+
+  suite('real-world-ish mixins', () => {
+    test('validation works', () => {
+      const HumanlyNameable = Mixin(superclass => class extends superclass {
+        constructor () {
+          super(...arguments)
+          this.firstName = ''
+          this.lastName = ''
+        }
+
+        get fullName () {
+          return `${this.firstName} ${this.lastName}`
+        }
+
+        set first (it) {
+          this.firstName = this.checkFirstName(it)
+        }
+
+        checkFirstName (it) {
+          return it
+        }
+
+        set last (it) {
+          this.lastName = this.checkLastName(it)
+        }
+
+        checkLastName (it) {
+          return it
+        }
+      })
+
+      class Person extends mixins(HumanlyNameable) {
+        checkFirstName (it) {
+          if (!it) throw new Error('nothing given')
+          return it
+        }
+
+        checkLastName (it) {
+          if (!it) throw new Error('nothing given')
+          return it
+        }
+      }
+
+      const first = 'Cheeky'
+      const last = 'Monkey'
+      const me = new Person()
+      me.first = first
+      me.last = last
+      assert.equal(first, me.firstName)
+      assert.equal(last, me.lastName)
+      assert.equal(`${first} ${last}`, me.fullName)
+
+      assert.throws(() => {
+        me.first = null
+      })
+      assert.throws(() => {
+        me.last = null
+      })
     })
   })
 })
