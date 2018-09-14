@@ -191,24 +191,32 @@ const Mixin = mixin => HasInstance(DeDupe(Cached(BareMixin(mixin))))
    * A fluent interface to apply a list of mixins to a superclass.
    *
    * ```javascript
-   * class X extends mix(Object).with(A, B, C) {}
+   * class X extends mix(Superclass).with(A, B, C) {}
    * ```
    *
    * The mixins are applied in order to the superclass, so the prototype chain
-   * will be: X->C'->B'->A'->Object.
+   * will be: X->C'->B'->A'->Superclass.
    *
    * This is purely a convenience function. The above example is equivalent to:
    *
    * ```javascript
-   * class X extends C(B(A(Object))) {}
+   * class X extends C(B(A(Superclass))) {}
    * ```
    *
    * @function
-   * @param {Function} [superclass=Object]
+   * @param {Function} [superclass=(class {})]
    * @return {MixinBuilder}
    */
 const mix = superclass => new MixinBuilder(superclass)
 
+/**
+ * A convenient syntactical shortcut to handle the case when a class extends
+ * no other class, instead of having to call ```mix().with(M1, M2, ...)```,
+ * which avoids confusion over whether someone should or shouldn't pass a
+ * superclass argument and so that it reads more naturally.
+ * @param ms {Function[]} Array of mixins
+ * @returns {Function}
+ */
 const mixins = (...ms) => mix().with(...ms)
 
 class MixinBuilder {

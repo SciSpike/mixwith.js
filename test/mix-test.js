@@ -97,6 +97,22 @@ suite('mixwith.js', () => {
       assert.deepEqual(i.foo(), 'foo')
     })
 
+    test('fields on mixin are present', () => {
+      const M = BareMixin((s) => class extends s {
+        constructor () {
+          super(...arguments)
+          this.field = 12
+        }
+        foo () { return this.field }
+      })
+
+      class C extends M(Object) {}
+
+      const i = new C()
+      assert.deepEqual(i.field, 12)
+      assert.deepEqual(i.foo(), 12)
+    })
+
     test('methods on superclass are present', () => {
       const M = BareMixin((s) => class extends s {})
 
@@ -110,6 +126,25 @@ suite('mixwith.js', () => {
       assert.deepEqual(i.foo(), 'foo')
     })
 
+    test('fields on superclass are present', () => {
+      const M = BareMixin((s) => class extends s {
+        constructor () {
+          super(...arguments)
+          this.superclassField = 12
+        }
+      })
+
+      class S {
+        foo () { return this.superclassField }
+      }
+
+      class C extends M(S) {}
+
+      const i = new C()
+      assert.deepEqual(i.superclassField, 12)
+      assert.deepEqual(i.foo(), 12)
+    })
+
     test('methods on subclass are present', () => {
       const M = BareMixin((s) => class extends s {})
 
@@ -119,6 +154,22 @@ suite('mixwith.js', () => {
 
       const i = new C()
       assert.deepEqual(i.foo(), 'foo')
+    })
+
+    test('fields on subclass are present', () => {
+      const M = BareMixin((s) => class extends s {})
+
+      class C extends M(Object) {
+        constructor () {
+          super(...arguments)
+          this.field = 12
+        }
+        foo () { return 12 }
+      }
+
+      const i = new C()
+      assert.deepEqual(i.field, 12)
+      assert.deepEqual(i.foo(), 12)
     })
 
     test('methods on mixin override superclass', () => {
@@ -134,6 +185,29 @@ suite('mixwith.js', () => {
 
       const i = new C()
       assert.deepEqual(i.foo(), 'bar')
+    })
+
+    test('fields on mixin override superclass', () => {
+      const M = BareMixin((s) => class extends s {
+        constructor () {
+          super(...arguments)
+          this.field = 12
+        }
+        foo () { return this.field }
+      })
+
+      class S {
+        constructor () {
+          this.field = 13
+        }
+        foo () { return this.field }
+      }
+
+      class C extends M(S) {}
+
+      const i = new C()
+      assert.deepEqual(i.field, 12)
+      assert.deepEqual(i.foo(), 12)
     })
 
     test('methods on mixin can call super', () => {
@@ -166,6 +240,29 @@ suite('mixwith.js', () => {
       assert.deepEqual(i.foo(), 'subfoo')
     })
 
+    test('fields on subclass override superclass', () => {
+      const M = BareMixin((s) => class extends s {})
+
+      class S {
+        constructor () {
+          this.field = 12
+        }
+        foo () { return 12 }
+      }
+
+      class C extends M(S) {
+        constructor () {
+          super(...arguments)
+          this.field = 13
+        }
+        foo () { return this.field }
+      }
+
+      const i = new C()
+      assert.deepEqual(i.field, 13)
+      assert.deepEqual(i.foo(), 13)
+    })
+
     test('methods on subclass override mixin', () => {
       const M = BareMixin((s) => class extends s {
         foo () { return 'mixinfoo' }
@@ -179,6 +276,30 @@ suite('mixwith.js', () => {
 
       const i = new C()
       assert.deepEqual(i.foo(), 'subfoo')
+    })
+
+    test('fields on subclass override mixin', () => {
+      const M = BareMixin((s) => class extends s {
+        constructor () {
+          super(...arguments)
+          this.field = 12
+        }
+        foo () { return this.field }
+      })
+
+      class S {}
+
+      class C extends M(S) {
+        constructor () {
+          super(...arguments)
+          this.field = 13
+        }
+        foo () { return this.field }
+      }
+
+      const i = new C()
+      assert.deepEqual(i.field, 13)
+      assert.deepEqual(i.foo(), 13)
     })
 
     test('methods on subclass can call super to superclass', () => {
@@ -276,18 +397,19 @@ suite('mixwith.js', () => {
       assert.equal(nthPrototypeOf(i, 4), S.prototype)
     })
 
-    test('applies mixins in order with Object as superclass', () => {
+    test('applies mixins in order with no superclass', () => {
       const M1 = BareMixin((s) => class extends s {})
       const M2 = BareMixin((s) => class extends s {})
 
-      class C extends mix(Object).with(M1, M2) {}
+      class C extends mixins(M1, M2) {}
 
       const i = new C()
       assert.isTrue(hasMixin(i, M1))
       assert.isTrue(hasMixin(i, M2))
       assert.isTrue(isApplicationOf(nthPrototypeOf(i, 2), M2))
       assert.isTrue(isApplicationOf(nthPrototypeOf(i, 3), M1))
-      assert.equal(nthPrototypeOf(i, 4), Object.prototype)
+      assert.isNotNull(nthPrototypeOf(i, 4))
+      assert.equal(nthPrototypeOf(i, 5), Object.prototype)
     })
 
     test('mix() can omit the superclass', () => {
@@ -305,7 +427,7 @@ suite('mixwith.js', () => {
         }
       })
 
-      class C extends mix().with(M) {
+      class C extends mixins(M) {
         static staticClassMethod () {
           return 7
         }
@@ -328,9 +450,7 @@ suite('mixwith.js', () => {
       assert.equal(42, C.staticMixinMethod())
       assert.equal(7, C.staticClassMethod())
     })
-  })
 
-  suite('basic usage', () => {
     test('class instanceof mixin', () => {
       const M = Mixin(c => class extends c {})
       const N = Mixin(d => class extends d {})
